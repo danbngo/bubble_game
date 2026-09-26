@@ -11,6 +11,11 @@ canvas {
   cursor: pointer;
 }
 
+/* Make the hidden attribute win over display rules like #shop's flex */
+[hidden] {
+  display: none !important;
+}
+
 button {
   font: bold 18px sans-serif;
   padding: 10px 16px;
