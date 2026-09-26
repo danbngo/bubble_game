@@ -9,8 +9,34 @@
 <body>
   <canvas id="game"></canvas>
 
+  <div id="hud-buttons">
+    <button id="use-knife-btn">🔪 Use knife (0)</button>
+    <button id="shop-btn">🛒 Shop</button>
+  </div>
+
+  <div id="shop" hidden>
+    <div class="shop-panel">
+      <h2>🛒 Shop</h2>
+      <p class="shop-balance">You have <span id="shop-pops">0</span> pops</p>
+
+      <div class="shop-item">
+        <div class="shop-item-icon">🔪</div>
+        <div class="shop-item-info">
+          <strong>Knife</strong>
+          <span>Flies around popping bubbles for you for 5 seconds.</span>
+        </div>
+        <button id="buy-knife">Buy · 15 pops</button>
+      </div>
+
+      <button id="close-shop" class="close-btn">Back to popping</button>
+    </div>
+  </div>
+
   <script src="js/bubble.js"></script>
   <script src="js/particle.js"></script>
+  <script src="js/knife.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/shop.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

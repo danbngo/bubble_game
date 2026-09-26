@@ -3,9 +3,107 @@ html, body {
   padding: 0;
   overflow: hidden;
   background: #0b2a4a;
+  font-family: sans-serif;
 }
 
 canvas {
   display: block;
   cursor: pointer;
+}
+
+button {
+  font: bold 18px sans-serif;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #ffd84d;
+  color: #3a2a00;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #b8941a;
+}
+
+button:hover:not(:disabled) {
+  background: #ffe47a;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b8941a;
+}
+
+button:disabled {
+  background: #8a8f99;
+  color: #3b3f46;
+  box-shadow: 0 3px 0 #5d626b;
+  cursor: not-allowed;
+}
+
+#hud-buttons {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+#shop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 10, 30, 0.6);
+}
+
+.shop-panel {
+  width: min(420px, 90vw);
+  padding: 24px;
+  border-radius: 16px;
+  background: #13406b;
+  color: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.shop-panel h2 {
+  margin: 0 0 4px;
+  font-size: 32px;
+}
+
+.shop-balance {
+  margin: 0 0 20px;
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shop-item-icon {
+  font-size: 40px;
+}
+
+.shop-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.close-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  background: #7fd3ff;
+  color: #06304f;
+  box-shadow: 0 3px 0 #3f93bf;
+}
+
+.close-btn:hover:not(:disabled) {
+  background: #a3e0ff;
 }

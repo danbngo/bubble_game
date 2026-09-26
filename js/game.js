@@ -8,7 +8,10 @@ const MIN_SPAWN_INTERVAL = 0.1;
 
 let bubbles = [];
 let particles = [];
-let score = 0;
+let knives = [];      // knives currently flying around
+let totalPopped = 0;  // all-time pops, drives the level
+let pops = 0;         // pops you can spend in the shop
+let knivesOwned = 0;
 let level = 1;
 let levelUpTimer = 0; // seconds left to show the "Level up!" banner
 let spawnTimer = 0;
@@ -40,13 +43,23 @@ function popBubble(index) {
   for (let i = 0; i < 12; i++) {
     particles.push(new Particle(b.x, b.y, b.hue));
   }
+  Sound.pop(b.radius);
   bubbles.splice(index, 1);
-  score++;
+  totalPopped++;
+  pops++;
+  Shop.refresh();
 
-  if (score % POPS_PER_LEVEL === 0) {
+  if (totalPopped % POPS_PER_LEVEL === 0) {
     level++;
     levelUpTimer = 1.5;
   }
+}
+
+function useKnife() {
+  if (knivesOwned === 0) return;
+  knivesOwned--;
+  knives.push(new Knife(canvas.width / 2, canvas.height / 2, KNIFE_DURATION));
+  Shop.refresh();
 }
 
 function handleClick(event) {
@@ -63,6 +76,12 @@ function handleClick(event) {
   }
 }
 
+function handleKey(event) {
+  if (event.key === 'k' || event.key === 'K') useKnife();
+  if (event.key === 's' || event.key === 'S') Shop.toggle();
+  if (event.key === 'Escape') Shop.close();
+}
+
 function update(dt) {
   spawnTimer += dt;
   if (spawnTimer >= spawnInterval() && bubbles.length < maxBubbles()) {
@@ -77,6 +96,16 @@ function update(dt) {
   for (const b of bubbles) {
     b.update(dt, canvas.width, canvas.height);
   }
+
+  for (const k of knives) {
+    const hit = k.update(dt, bubbles, canvas.width, canvas.height);
+    const index = bubbles.indexOf(hit);
+    // Two knives can reach the same bubble in one frame; only the first pops it
+    if (index !== -1) {
+      popBubble(index);
+    }
+  }
+  knives = knives.filter(k => !k.isDone());
 
   for (const p of particles) {
     p.update(dt);
@@ -97,13 +126,21 @@ function draw() {
   for (const p of particles) {
     p.draw(ctx);
   }
+  for (const k of knives) {
+    k.draw(ctx);
+  }
 
   ctx.fillStyle = 'white';
   ctx.font = 'bold 28px sans-serif';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillText('Popped: ' + score, 20, 20);
+  ctx.fillText('Pops: ' + pops, 20, 20);
   ctx.fillText('Level: ' + level, 20, 56);
+
+  if (knives.length > 0) {
+    const longest = Math.max(...knives.map(k => k.timeLeft));
+    ctx.fillText('🔪 ' + longest.toFixed(1) + 's', 20, 92);
+  }
 
   if (levelUpTimer > 0) {
     ctx.save();
@@ -120,15 +157,22 @@ function loop(now) {
   const dt = Math.min((now - lastTime) / 1000, 0.05); // cap dt so tab-switching doesn't cause jumps
   lastTime = now;
 
-  update(dt);
+  // The game pauses while the shop is open
+  if (!Shop.isOpen) {
+    update(dt);
+  }
   draw();
   requestAnimationFrame(loop);
 }
 
 window.addEventListener('resize', resize);
+window.addEventListener('keydown', handleKey);
 canvas.addEventListener('pointerdown', handleClick);
 
 resize();
+Sound.init();
+Shop.init();
+Shop.refresh();
 // Start with a few bubbles already on screen
 for (let i = 0; i < 5; i++) {
   spawnBubble();
