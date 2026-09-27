@@ -131,6 +131,7 @@ function startGame() {
   document.getElementById('title-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = false;
   document.getElementById('hud-left').hidden = false;
+  Tutorial.start();
 }
 
 function goToTitle() {
@@ -138,6 +139,7 @@ function goToTitle() {
   started = false;
   Sound.startAmbience(); // was stopped by the pause; keep the birds going on the title screen
   setMusic(false);       // the Stop music button is hidden on the title screen
+  Tutorial.end();
   document.getElementById('pause-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = true;
   document.getElementById('hud-left').hidden = true;
@@ -186,7 +188,9 @@ function handleClick(event) {
 
 function handleKey(event) {
   if (!started) {
-    if (event.key === 'Enter' || event.key === ' ') startGame();
+    // A focused button (like the tutorial toggle) handles Enter/Space itself
+    const onButton = event.target.tagName === 'BUTTON';
+    if (!onButton && (event.key === 'Enter' || event.key === ' ')) startGame();
     return;
   }
   if (event.key === 'p' || event.key === 'P') {
@@ -337,6 +341,7 @@ function loop(now) {
   if (!paused && !Shop.isOpen) {
     update(dt);
   }
+  Tutorial.update();
   draw();
   requestAnimationFrame(loop);
 }
@@ -358,5 +363,6 @@ document.addEventListener('visibilitychange', () => {
 resize();
 Sound.init();
 Shop.init();
+Tutorial.init();
 resetGame();
 requestAnimationFrame(loop);

@@ -13,6 +13,7 @@
     <h1 class="game-title">Bubble Pop</h1>
     <p class="tagline">Pop as many bubbles as you can!</p>
     <button id="play-btn" class="play-btn">Play</button>
+    <button id="tutorial-toggle" class="tutorial-toggle">TUTORIAL: ON</button>
     <ul class="how-to">
       <li>Click bubbles to pop them</li>
       <li>Every 20 pops, bubbles come faster, and every 5 levels they move faster</li>
@@ -36,6 +37,14 @@
   <div id="hud-buttons" hidden>
     <button id="shop-btn">🛒 Shop</button>
     <button id="pause-btn" title="Pause (P)">⏸</button>
+  </div>
+
+  <div id="tutorial" hidden>
+    <p id="tutorial-text"></p>
+    <div class="tutorial-buttons">
+      <button id="tutorial-next" hidden>Got it!</button>
+      <button id="tutorial-skip" class="tutorial-skip">Skip tutorial</button>
+    </div>
   </div>
 
   <div id="pause-screen" hidden>
@@ -66,6 +75,7 @@
   <script src="js/spikewalls.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/shop.js"></script>
+  <script src="js/tutorial.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

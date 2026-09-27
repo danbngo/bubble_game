@@ -139,6 +139,79 @@ kbd {
   background: #a3e0ff;
 }
 
+.tutorial-toggle {
+  margin-top: 14px;
+  font-size: 16px;
+  background: #7ee07e;
+  color: #0d3d0d;
+  box-shadow: 0 3px 0 #3f9f3f;
+}
+
+.tutorial-toggle:hover:not(:disabled) {
+  background: #9ceb9c;
+}
+
+.tutorial-toggle.off {
+  background: #d0d4da;
+  color: #3b3f46;
+  box-shadow: 0 3px 0 #8a8f99;
+}
+
+.tutorial-toggle.off:hover:not(:disabled) {
+  background: #e2e5e9;
+}
+
+/* Sits above the shop (so it can talk about the shop) but below the pause screen */
+#tutorial {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(520px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #06304f;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+#tutorial-text {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.tutorial-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tutorial-skip {
+  font-size: 14px;
+  background: none;
+  color: #4a6a85;
+  box-shadow: none;
+  text-decoration: underline;
+}
+
+.tutorial-skip:hover:not(:disabled) {
+  background: none;
+  color: #06304f;
+}
+
+#shop {
+  z-index: 1;
+}
+
+#pause-screen {
+  z-index: 3;
+}
+
 #hud-left {
   position: fixed;
   top: 12px;
