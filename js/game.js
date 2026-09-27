@@ -27,6 +27,7 @@ let spikeWalls = null; // the spike walls while they're closing in
 let totalPopped = 0;  // all-time pops, drives the level
 let pops = 0;         // pops you can spend in the shop
 let inventory = {};   // shop item id -> how many you own
+let timesBought = {}; // shop item id -> how many you've bought this game (raises the price)
 let started = false;  // false while the title screen is showing
 let paused = false;
 let level = 1;
@@ -124,8 +125,10 @@ function resetGame() {
   totalPopped = 0;
   pops = 0;
   inventory = {};
+  timesBought = {};
   for (const item of SHOP_ITEMS) {
     inventory[item.id] = 0;
+    timesBought[item.id] = 0;
   }
   level = 1;
   levelUpTimer = 0;

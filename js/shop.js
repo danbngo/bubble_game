@@ -1,6 +1,7 @@
-// Shop overlay. Uses the game's globals (pops, inventory) and item functions from game.js.
+// Shop overlay. Uses the game's globals (pops, inventory, timesBought) and item functions from game.js.
 const KNIFE_DURATION = 5; // seconds
 const SLOW_DURATION = 10; // seconds the anti-accelerator lasts
+const PRICE_GROWTH = 1.5; // each purchase makes that item cost 50% more
 
 // Everything the shop sells. To add an item, add an entry here and a use function in game.js.
 const SHOP_ITEMS = [
@@ -36,6 +37,11 @@ const SHOP_ITEMS = [
 
 function isUnlocked(item) {
   return level >= (item.minLevel || 1);
+}
+
+// `price` in SHOP_ITEMS is the starting price; it grows every time you buy that item
+function currentPrice(item) {
+  return Math.round(item.price * Math.pow(PRICE_GROWTH, timesBought[item.id]));
 }
 
 const Shop = {
@@ -96,9 +102,11 @@ const Shop = {
   },
 
   buy(item) {
-    if (pops < item.price || !isUnlocked(item)) return;
-    pops -= item.price;
+    const price = currentPrice(item);
+    if (pops < price || !isUnlocked(item)) return;
+    pops -= price;
     inventory[item.id]++;
+    timesBought[item.id]++;
     this.refresh();
   },
 
@@ -109,8 +117,9 @@ const Shop = {
       const owned = inventory[item.id];
       const unlocked = isUnlocked(item);
       const buyBtn = this.buyButtons[item.id];
-      buyBtn.textContent = unlocked ? `Buy · ${item.price} pops` : `🔒 Level ${item.minLevel}`;
-      buyBtn.disabled = !unlocked || pops < item.price;
+      const price = currentPrice(item);
+      buyBtn.textContent = unlocked ? `Buy · ${price} pops` : `🔒 Level ${item.minLevel}`;
+      buyBtn.disabled = !unlocked || pops < price;
       this.useButtons[item.id].textContent = `${item.icon} ${item.name} (${owned})`;
       this.useButtons[item.id].disabled = owned === 0 || !unlocked;
     }
