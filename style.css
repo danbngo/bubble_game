@@ -129,6 +129,16 @@ kbd {
   text-shadow: 0 0 20px rgba(127, 211, 255, 0.8), 0 5px 0 #1d6fa5;
 }
 
+.secondary-btn {
+  background: #7fd3ff;
+  color: #06304f;
+  box-shadow: 0 3px 0 #3f93bf;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: #a3e0ff;
+}
+
 #hud-buttons {
   position: fixed;
   top: 16px;

@@ -64,10 +64,38 @@ function useKnife() {
   Shop.refresh();
 }
 
+// Wipes all progress and puts a few bubbles back on screen
+function resetGame() {
+  bubbles = [];
+  particles = [];
+  knives = [];
+  totalPopped = 0;
+  pops = 0;
+  knivesOwned = 0;
+  level = 1;
+  levelUpTimer = 0;
+  spawnTimer = 0;
+  Shop.refresh();
+
+  for (let i = 0; i < 5; i++) {
+    spawnBubble();
+    bubbles[i].y = Math.random() * canvas.height;
+  }
+}
+
 function startGame() {
   started = true;
   document.getElementById('title-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = false;
+}
+
+function goToTitle() {
+  paused = false;
+  started = false;
+  document.getElementById('pause-screen').hidden = true;
+  document.getElementById('hud-buttons').hidden = true;
+  document.getElementById('title-screen').hidden = false;
+  resetGame();
 }
 
 function setPaused(value) {
@@ -203,6 +231,7 @@ canvas.addEventListener('pointerdown', handleClick);
 document.getElementById('play-btn').addEventListener('click', startGame);
 document.getElementById('pause-btn').addEventListener('click', () => setPaused(true));
 document.getElementById('resume-btn').addEventListener('click', () => setPaused(false));
+document.getElementById('title-btn').addEventListener('click', goToTitle);
 // Pause automatically when switching to another tab or window
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) setPaused(true);
@@ -211,10 +240,5 @@ document.addEventListener('visibilitychange', () => {
 resize();
 Sound.init();
 Shop.init();
-Shop.refresh();
-// Start with a few bubbles already on screen
-for (let i = 0; i < 5; i++) {
-  spawnBubble();
-  bubbles[i].y = Math.random() * canvas.height;
-}
+resetGame();
 requestAnimationFrame(loop);
