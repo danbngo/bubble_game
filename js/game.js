@@ -11,6 +11,12 @@ const SLOW_FACTOR = 0.35;   // anti-accelerator slows bubbles to 35% speed
 
 const sun = new Sun();
 const ground = new Ground();
+// x, y, size, speed. Different speeds so they drift past each other (and in front of the sun)
+const clouds = [
+  new Cloud(150, 130, 40, 12),
+  new Cloud(600, 220, 30, 8),
+  new Cloud(1000, 90, 50, 16),
+];
 
 let bubbles = [];
 let particles = [];
@@ -197,6 +203,9 @@ function update(dt) {
 
   sun.update(dt);
   ground.update(dt);
+  for (const c of clouds) {
+    c.update(dt, canvas.width);
+  }
 
   // Speeding up time for the bubbles makes them drift and wobble faster
   const bubbleDt = dt * bubbleSpeed();
@@ -238,6 +247,9 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   sun.draw(ctx, canvas.width);
+  for (const c of clouds) {
+    c.draw(ctx);
+  }
   ground.draw(ctx, canvas.width, canvas.height);
 
   for (const b of bubbles) {
@@ -256,6 +268,11 @@ function draw() {
   // The title screen shows only the floating bubbles
   if (!started) return;
 
+  ctx.save();
+  // Dark shadow keeps the white text readable when a cloud drifts behind it
+  ctx.shadowColor = 'rgba(0, 30, 60, 0.8)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 2;
   ctx.fillStyle = 'white';
   ctx.font = 'bold 28px sans-serif';
   ctx.textAlign = 'left';
@@ -290,6 +307,7 @@ function draw() {
     }
     ctx.restore();
   }
+  ctx.restore();
 }
 
 function loop(now) {
