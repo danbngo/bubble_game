@@ -12,6 +12,7 @@ let knives = [];      // knives currently flying around
 let totalPopped = 0;  // all-time pops, drives the level
 let pops = 0;         // pops you can spend in the shop
 let knivesOwned = 0;
+let started = false;  // false while the title screen is showing
 let level = 1;
 let levelUpTimer = 0; // seconds left to show the "Level up!" banner
 let spawnTimer = 0;
@@ -62,7 +63,14 @@ function useKnife() {
   Shop.refresh();
 }
 
+function startGame() {
+  started = true;
+  document.getElementById('title-screen').hidden = true;
+  document.getElementById('hud-buttons').hidden = false;
+}
+
 function handleClick(event) {
+  if (!started) return;
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -77,6 +85,10 @@ function handleClick(event) {
 }
 
 function handleKey(event) {
+  if (!started) {
+    if (event.key === 'Enter' || event.key === ' ') startGame();
+    return;
+  }
   if (event.key === 'k' || event.key === 'K') useKnife();
   if (event.key === 's' || event.key === 'S') Shop.toggle();
   if (event.key === 'Escape') Shop.close();
@@ -130,6 +142,9 @@ function draw() {
     k.draw(ctx);
   }
 
+  // The title screen shows only the floating bubbles
+  if (!started) return;
+
   ctx.fillStyle = 'white';
   ctx.font = 'bold 28px sans-serif';
   ctx.textAlign = 'left';
@@ -168,6 +183,7 @@ function loop(now) {
 window.addEventListener('resize', resize);
 window.addEventListener('keydown', handleKey);
 canvas.addEventListener('pointerdown', handleClick);
+document.getElementById('play-btn').addEventListener('click', startGame);
 
 resize();
 Sound.init();

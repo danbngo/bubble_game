@@ -43,6 +43,71 @@ button:disabled {
   cursor: not-allowed;
 }
 
+#title-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  text-align: center;
+  color: white;
+  background: rgba(0, 10, 30, 0.35);
+}
+
+.game-title {
+  margin: 0;
+  font-size: clamp(56px, 12vw, 120px);
+  letter-spacing: 2px;
+  color: #bff0ff;
+  text-shadow:
+    0 0 20px rgba(127, 211, 255, 0.8),
+    0 6px 0 #1d6fa5,
+    0 10px 20px rgba(0, 0, 0, 0.5);
+  animation: bob 2.5s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.tagline {
+  margin: 8px 0 28px;
+  font-size: 22px;
+  opacity: 0.9;
+}
+
+.play-btn {
+  font-size: 32px;
+  padding: 14px 56px;
+  border-radius: 999px;
+}
+
+.how-to {
+  margin: 32px 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 18px;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+.keys {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  font: bold 14px monospace;
+}
+
 #hud-buttons {
   position: fixed;
   top: 16px;
