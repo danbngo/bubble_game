@@ -18,12 +18,19 @@
       <li>Every 20 pops, bubbles come faster</li>
       <li>Spend pops in the shop on knives that pop bubbles for you</li>
     </ul>
-    <p class="keys"><kbd>S</kbd> shop &nbsp; <kbd>K</kbd> use knife &nbsp; <kbd>Esc</kbd> close shop</p>
+    <p class="keys"><kbd>S</kbd> shop &nbsp; <kbd>K</kbd> use knife &nbsp; <kbd>P</kbd> pause</p>
   </div>
 
   <div id="hud-buttons" hidden>
     <button id="use-knife-btn">🔪 Use knife (0)</button>
     <button id="shop-btn">🛒 Shop</button>
+    <button id="pause-btn" title="Pause (P)">⏸</button>
+  </div>
+
+  <div id="pause-screen" hidden>
+    <h2 class="pause-title">Paused</h2>
+    <button id="resume-btn" class="play-btn">Resume</button>
+    <p class="keys">Press <kbd>P</kbd> or <kbd>Esc</kbd> to resume</p>
   </div>
 
   <div id="shop" hidden>

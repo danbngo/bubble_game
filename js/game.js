@@ -13,6 +13,7 @@ let totalPopped = 0;  // all-time pops, drives the level
 let pops = 0;         // pops you can spend in the shop
 let knivesOwned = 0;
 let started = false;  // false while the title screen is showing
+let paused = false;
 let level = 1;
 let levelUpTimer = 0; // seconds left to show the "Level up!" banner
 let spawnTimer = 0;
@@ -69,8 +70,15 @@ function startGame() {
   document.getElementById('hud-buttons').hidden = false;
 }
 
+function setPaused(value) {
+  // The shop already pauses the game, so don't stack a pause on top of it
+  if (!started || Shop.isOpen) return;
+  paused = value;
+  document.getElementById('pause-screen').hidden = !paused;
+}
+
 function handleClick(event) {
-  if (!started) return;
+  if (!started || paused) return;
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -89,9 +97,18 @@ function handleKey(event) {
     if (event.key === 'Enter' || event.key === ' ') startGame();
     return;
   }
+  if (event.key === 'p' || event.key === 'P') {
+    setPaused(!paused);
+    return;
+  }
+  if (event.key === 'Escape') {
+    if (Shop.isOpen) Shop.close();
+    else setPaused(!paused);
+    return;
+  }
+  if (paused) return;
   if (event.key === 'k' || event.key === 'K') useKnife();
   if (event.key === 's' || event.key === 'S') Shop.toggle();
-  if (event.key === 'Escape') Shop.close();
 }
 
 function update(dt) {
@@ -172,8 +189,8 @@ function loop(now) {
   const dt = Math.min((now - lastTime) / 1000, 0.05); // cap dt so tab-switching doesn't cause jumps
   lastTime = now;
 
-  // The game pauses while the shop is open
-  if (!Shop.isOpen) {
+  // The game also pauses while the shop is open
+  if (!paused && !Shop.isOpen) {
     update(dt);
   }
   draw();
@@ -184,6 +201,12 @@ window.addEventListener('resize', resize);
 window.addEventListener('keydown', handleKey);
 canvas.addEventListener('pointerdown', handleClick);
 document.getElementById('play-btn').addEventListener('click', startGame);
+document.getElementById('pause-btn').addEventListener('click', () => setPaused(true));
+document.getElementById('resume-btn').addEventListener('click', () => setPaused(false));
+// Pause automatically when switching to another tab or window
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) setPaused(true);
+});
 
 resize();
 Sound.init();
