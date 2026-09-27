@@ -8,6 +8,7 @@ const MIN_SPAWN_INTERVAL = 0.1;
 const LEVELS_PER_SPEEDUP = 5;
 const SPEEDUP_AMOUNT = 0.4; // each speed-up makes bubbles move 40% of their base speed faster
 const SLOW_FACTOR = 0.35;   // anti-accelerator slows bubbles to 35% speed
+const RAINBOW_CHANCE = 0.07; // about 1 in 14 bubbles is a rainbow bubble
 
 const sun = new Sun();
 const ground = new Ground();
@@ -20,6 +21,7 @@ const clouds = [
 
 let bubbles = [];
 let particles = [];
+let floatingTexts = []; // "+3" labels from rainbow bubbles
 let knives = [];      // knives currently flying around
 let spikeWalls = null; // the spike walls while they're closing in
 let totalPopped = 0;  // all-time pops, drives the level
@@ -57,21 +59,32 @@ function spawnBubble() {
   const radius = 20 + Math.random() * 40;
   const x = radius + Math.random() * (canvas.width - radius * 2);
   const y = canvas.height + radius;
-  bubbles.push(new Bubble(x, y, radius));
+  const rainbow = Math.random() < RAINBOW_CHANCE;
+  bubbles.push(new Bubble(x, y, radius, rainbow));
 }
 
 function popBubble(index) {
   const b = bubbles[index];
-  for (let i = 0; i < 12; i++) {
-    particles.push(new Particle(b.x, b.y, b.hue));
+  if (b.rainbow) {
+    // Extra droplets in every color, plus a "+3" so you notice the bonus
+    for (let i = 0; i < 24; i++) {
+      particles.push(new Particle(b.x, b.y, Math.random() * 360));
+    }
+    floatingTexts.push(new FloatingText(b.x, b.y, '+' + b.value));
+  } else {
+    for (let i = 0; i < 12; i++) {
+      particles.push(new Particle(b.x, b.y, b.hue));
+    }
   }
   Sound.pop(b.radius);
   bubbles.splice(index, 1);
-  totalPopped++;
-  pops++;
+  totalPopped += b.value;
+  pops += b.value;
 
-  if (totalPopped % POPS_PER_LEVEL === 0) {
-    level++;
+  // A rainbow bubble's +3 can jump past a level boundary, so work the level out from the total
+  const newLevel = 1 + Math.floor(totalPopped / POPS_PER_LEVEL);
+  if (newLevel > level) {
+    level = newLevel;
     levelUpTimer = level % LEVELS_PER_SPEEDUP === 0 ? 2.5 : 1.5; // linger longer on speed-ups
   }
   Shop.refresh();
@@ -105,6 +118,7 @@ function useAntiAccelerator() {
 function resetGame() {
   bubbles = [];
   particles = [];
+  floatingTexts = [];
   knives = [];
   spikeWalls = null;
   totalPopped = 0;
@@ -259,6 +273,11 @@ function update(dt) {
     p.update(dt);
   }
   particles = particles.filter(p => !p.isDead());
+
+  for (const t of floatingTexts) {
+    t.update(dt);
+  }
+  floatingTexts = floatingTexts.filter(t => !t.isDead());
 }
 
 function draw() {
@@ -285,6 +304,9 @@ function draw() {
   }
   if (spikeWalls) {
     spikeWalls.draw(ctx, canvas.width, canvas.height);
+  }
+  for (const t of floatingTexts) {
+    t.draw(ctx);
   }
 
   // The title screen shows only the floating bubbles

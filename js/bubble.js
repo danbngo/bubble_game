@@ -1,9 +1,11 @@
-// A single floating bubble.
+// A single floating bubble. Rainbow bubbles are rare and worth more pops.
 class Bubble {
-  constructor(x, y, radius) {
+  constructor(x, y, radius, rainbow = false) {
     this.x = x;
     this.y = y;
     this.radius = radius;
+    this.rainbow = rainbow;
+    this.value = rainbow ? 3 : 1; // pops you get for popping it
     this.vx = (Math.random() - 0.5) * 40;   // pixels per second
     this.vy = -(30 + Math.random() * 50);   // drift upward
     this.hue = Math.floor(Math.random() * 360);
@@ -12,6 +14,9 @@ class Bubble {
 
   update(dt, width, height) {
     this.wobble += dt * 2;
+    if (this.rainbow) {
+      this.hue = (this.hue + dt * 120) % 360; // colors swirl around
+    }
     this.x += (this.vx + Math.sin(this.wobble) * 15) * dt;
     this.y += this.vy * dt;
 
@@ -53,15 +58,37 @@ class Bubble {
     ctx.fillStyle = body;
     ctx.fill();
 
-    // Rim
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = `hsla(${this.hue}, 90%, 85%, 0.7)`;
-    ctx.stroke();
+    if (this.rainbow) {
+      this.drawRainbowRim(ctx);
+    } else {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `hsla(${this.hue}, 90%, 85%, 0.7)`;
+      ctx.stroke();
+    }
 
     // Shine highlight
     ctx.beginPath();
     ctx.ellipse(this.x - r * 0.35, this.y - r * 0.4, r * 0.25, r * 0.12, -Math.PI / 4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.fill();
+  }
+
+  // A thick ring made of every color of the rainbow, spinning as the hue changes
+  drawRainbowRim(ctx) {
+    const segments = 24;
+    const step = (Math.PI * 2) / segments;
+    ctx.save();
+    ctx.lineWidth = 5;
+    ctx.shadowColor = 'white';
+    ctx.shadowBlur = 10;
+    for (let i = 0; i < segments; i++) {
+      const hue = (this.hue + (i * 360) / segments) % 360;
+      ctx.beginPath();
+      // Overlap each piece slightly so there are no gaps between colors
+      ctx.arc(this.x, this.y, this.radius - 2, i * step, (i + 1) * step + 0.02);
+      ctx.strokeStyle = `hsl(${hue}, 95%, 60%)`;
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 }
