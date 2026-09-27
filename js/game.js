@@ -6,6 +6,8 @@ const BASE_MAX_BUBBLES = 15;
 const BASE_SPAWN_INTERVAL = 0.8; // seconds between new bubbles at level 1
 const MIN_SPAWN_INTERVAL = 0.1;
 
+const sun = new Sun();
+
 let bubbles = [];
 let particles = [];
 let knives = [];      // knives currently flying around
@@ -165,6 +167,8 @@ function update(dt) {
     levelUpTimer -= dt;
   }
 
+  sun.update(dt);
+
   for (const b of bubbles) {
     b.update(dt, canvas.width, canvas.height);
   }
@@ -197,10 +201,12 @@ function update(dt) {
 
 function draw() {
   const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bg.addColorStop(0, '#0b2a4a');
-  bg.addColorStop(1, '#1d6fa5');
+  bg.addColorStop(0, '#3a9be0');
+  bg.addColorStop(1, '#0f4f86');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  sun.draw(ctx, canvas.width);
 
   for (const b of bubbles) {
     b.draw(ctx);
