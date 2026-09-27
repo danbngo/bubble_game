@@ -139,6 +139,44 @@ kbd {
   background: #a3e0ff;
 }
 
+#hud-left {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.smiley-btn {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 50%;
+  line-height: 0;
+  transition: transform 0.15s;
+}
+
+.smiley-btn:hover:not(:disabled) {
+  background: none;
+  transform: scale(1.1);
+}
+
+.smiley-btn:active:not(:disabled) {
+  box-shadow: none;
+  transform: scale(0.95);
+}
+
+/* The smiley dances while the music is on */
+.smiley-btn.playing {
+  animation: dance 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes dance {
+  from { transform: rotate(-12deg) scale(1.05); }
+  to { transform: rotate(12deg) scale(1.05); }
+}
+
 #hud-buttons {
   position: fixed;
   top: 16px;

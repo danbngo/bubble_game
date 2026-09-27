@@ -130,16 +130,34 @@ function startGame() {
   Sound.startAmbience();
   document.getElementById('title-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = false;
+  document.getElementById('hud-left').hidden = false;
 }
 
 function goToTitle() {
   paused = false;
   started = false;
   Sound.startAmbience(); // was stopped by the pause; keep the birds going on the title screen
+  setMusic(false);       // the Stop music button is hidden on the title screen
   document.getElementById('pause-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = true;
+  document.getElementById('hud-left').hidden = true;
   document.getElementById('title-screen').hidden = false;
   resetGame();
+}
+
+// The Stop music button shows up the first time music plays, then stays,
+// greyed out whenever the music is off
+function setMusic(on) {
+  const smiley = document.getElementById('smiley-btn');
+  const stopBtn = document.getElementById('stop-music-btn');
+  if (on) {
+    Sound.startMusic();
+    stopBtn.hidden = false;
+  } else {
+    Sound.stopMusic();
+  }
+  stopBtn.disabled = !on;
+  smiley.classList.toggle('playing', on);
 }
 
 function setPaused(value) {
@@ -277,11 +295,12 @@ function draw() {
   ctx.font = 'bold 28px sans-serif';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillText('Pops: ' + pops, 20, 20);
-  ctx.fillText('Level: ' + level, 20, 56);
+  // Starts below the smiley face button
+  ctx.fillText('Pops: ' + pops, 20, 90);
+  ctx.fillText('Level: ' + level, 20, 126);
 
   // Countdowns for active items, stacked under the level
-  let timerY = 92;
+  let timerY = 162;
   if (knives.length > 0) {
     const longest = Math.max(...knives.map(k => k.timeLeft));
     ctx.fillText('🔪 ' + longest.toFixed(1) + 's', 20, timerY);
@@ -329,6 +348,8 @@ document.getElementById('play-btn').addEventListener('click', startGame);
 document.getElementById('pause-btn').addEventListener('click', () => setPaused(true));
 document.getElementById('resume-btn').addEventListener('click', () => setPaused(false));
 document.getElementById('title-btn').addEventListener('click', goToTitle);
+document.getElementById('smiley-btn').addEventListener('click', () => setMusic(true));
+document.getElementById('stop-music-btn').addEventListener('click', () => setMusic(false));
 // Pause automatically when switching to another tab or window
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) setPaused(true);

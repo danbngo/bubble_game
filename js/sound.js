@@ -1,6 +1,6 @@
 // Sound effects and background ambience.
-// Drop files at sounds/pop.mp3 and sounds/background.mp3 and they will be used;
-// otherwise a pop and birdsong are synthesized.
+// Drop files at sounds/pop.mp3, sounds/background.mp3 and sounds/music.mp3 and they will be used;
+// otherwise a pop, birdsong and a little tune are synthesized.
 const Sound = {
   audioCtx: null,
   popFile: null,
@@ -10,6 +10,11 @@ const Sound = {
   bgFileReady: false,
   ambienceOn: false,
   birdTimer: null,
+  musicFile: null,
+  musicFileReady: false,
+  musicOn: false,
+  musicTimer: null,
+  musicNotes: [], // synthesized notes scheduled to play, so they can be stopped
 
   init() {
     this.popFile = new Audio('sounds/pop.mp3');
@@ -21,6 +26,12 @@ const Sound = {
     this.bgFile.volume = 0.4;
     this.bgFile.addEventListener('canplaythrough', () => { this.bgFileReady = true; }, { once: true });
     this.bgFile.load();
+
+    this.musicFile = new Audio('sounds/music.mp3');
+    this.musicFile.loop = true;
+    this.musicFile.volume = 0.6;
+    this.musicFile.addEventListener('canplaythrough', () => { this.musicFileReady = true; }, { once: true });
+    this.musicFile.load();
   },
 
   // The audio context can only start after the player clicks or presses a key
@@ -83,6 +94,76 @@ const Sound = {
     this.ambienceOn = false;
     this.bgFile.pause();
     clearTimeout(this.birdTimer);
+  },
+
+  startMusic() {
+    if (this.musicOn) return;
+    this.musicOn = true;
+    if (this.musicFileReady) {
+      this.musicFile.currentTime = 0;
+      this.musicFile.play().catch(() => {});
+    } else {
+      this.playTuneLoop();
+    }
+  },
+
+  stopMusic() {
+    this.musicOn = false;
+    this.musicFile.pause();
+    clearTimeout(this.musicTimer);
+    for (const osc of this.musicNotes) {
+      try { osc.stop(); } catch (e) { /* already finished */ }
+    }
+    this.musicNotes = [];
+  },
+
+  // A happy little tune that repeats until the music is stopped.
+  // Each note is [MIDI note number, length in beats]; 0 is a rest.
+  playTuneLoop() {
+    const melody = [
+      [72, 1], [76, 1], [79, 1], [76, 1], [77, 1], [81, 1], [79, 2],
+      [76, 1], [79, 1], [84, 1], [79, 1], [77, 1], [74, 1], [72, 2],
+      [74, 1], [77, 1], [81, 1], [77, 1], [76, 1], [79, 1], [84, 2],
+      [83, 1], [81, 1], [79, 1], [77, 1], [76, 1], [74, 1], [72, 2],
+    ];
+    const bass = [48, 53, 55, 48]; // one bass note per 8-beat bar
+    const beat = 0.22; // seconds per beat
+
+    const ac = this.context();
+    const start = ac.currentTime + 0.05;
+    this.musicNotes = [];
+
+    let t = start;
+    for (const [note, beats] of melody) {
+      if (note) this.playNote(note, t, beats * beat * 0.9, 'triangle', 0.12);
+      t += beats * beat;
+    }
+    bass.forEach((note, i) => {
+      this.playNote(note, start + i * 8 * beat, 8 * beat * 0.95, 'sine', 0.15);
+    });
+
+    // Queue up the next time through just as this one ends
+    const loopLength = t - start;
+    this.musicTimer = setTimeout(() => {
+      if (this.musicOn) this.playTuneLoop();
+    }, loopLength * 1000);
+  },
+
+  playNote(midi, time, length, type, volume) {
+    const ac = this.context();
+    const osc = ac.createOscillator();
+    osc.type = type;
+    osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(volume, time + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
+
+    osc.connect(gain).connect(ac.destination);
+    osc.start(time);
+    osc.stop(time + length + 0.02);
+    this.musicNotes.push(osc);
   },
 
   // Synthesized birdsong: a random bird calls every second or few
