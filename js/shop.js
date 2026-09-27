@@ -1,5 +1,6 @@
 // Shop overlay. Uses the game's globals (pops, inventory) and item functions from game.js.
 const KNIFE_DURATION = 5; // seconds
+const SLOW_DURATION = 10; // seconds the anti-accelerator lasts
 
 // Everything the shop sells. To add an item, add an entry here and a use function in game.js.
 const SHOP_ITEMS = [
@@ -21,7 +22,21 @@ const SHOP_ITEMS = [
     description: 'Two spiked walls close in and pop every bubble on screen.',
     use: () => useSpikeWalls(),
   },
+  {
+    id: 'slow',
+    name: 'Anti-Accelerator',
+    icon: '🐢',
+    price: 50,
+    key: 'a',
+    minLevel: 10, // can't be bought or used before this level
+    description: 'Slows all bubbles way down for 10 seconds.',
+    use: () => useAntiAccelerator(),
+  },
 ];
+
+function isUnlocked(item) {
+  return level >= (item.minLevel || 1);
+}
 
 const Shop = {
   isOpen: false,
@@ -47,7 +62,6 @@ const Shop = {
           <span>${item.description}</span>
         </div>`;
       const buyBtn = document.createElement('button');
-      buyBtn.textContent = `Buy · ${item.price} pops`;
       buyBtn.addEventListener('click', () => this.buy(item));
       row.appendChild(buyBtn);
       itemList.appendChild(row);
@@ -82,7 +96,7 @@ const Shop = {
   },
 
   buy(item) {
-    if (pops < item.price) return;
+    if (pops < item.price || !isUnlocked(item)) return;
     pops -= item.price;
     inventory[item.id]++;
     this.refresh();
@@ -93,9 +107,12 @@ const Shop = {
     this.popsLabel.textContent = pops;
     for (const item of SHOP_ITEMS) {
       const owned = inventory[item.id];
-      this.buyButtons[item.id].disabled = pops < item.price;
+      const unlocked = isUnlocked(item);
+      const buyBtn = this.buyButtons[item.id];
+      buyBtn.textContent = unlocked ? `Buy · ${item.price} pops` : `🔒 Level ${item.minLevel}`;
+      buyBtn.disabled = !unlocked || pops < item.price;
       this.useButtons[item.id].textContent = `${item.icon} ${item.name} (${owned})`;
-      this.useButtons[item.id].disabled = owned === 0;
+      this.useButtons[item.id].disabled = owned === 0 || !unlocked;
     }
   },
 };

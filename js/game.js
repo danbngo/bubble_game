@@ -5,6 +5,9 @@ const POPS_PER_LEVEL = 20;
 const BASE_MAX_BUBBLES = 15;
 const BASE_SPAWN_INTERVAL = 0.8; // seconds between new bubbles at level 1
 const MIN_SPAWN_INTERVAL = 0.1;
+const LEVELS_PER_SPEEDUP = 5;
+const SPEEDUP_AMOUNT = 0.4; // each speed-up makes bubbles move 40% of their base speed faster
+const SLOW_FACTOR = 0.35;   // anti-accelerator slows bubbles to 35% speed
 
 const sun = new Sun();
 const ground = new Ground();
@@ -20,6 +23,7 @@ let started = false;  // false while the title screen is showing
 let paused = false;
 let level = 1;
 let levelUpTimer = 0; // seconds left to show the "Level up!" banner
+let slowTimer = 0;    // seconds left on the anti-accelerator
 let spawnTimer = 0;
 let lastTime = performance.now();
 
@@ -30,6 +34,12 @@ function spawnInterval() {
 
 function maxBubbles() {
   return BASE_MAX_BUBBLES + (level - 1) * 5;
+}
+
+// Bubbles speed up at levels 5, 10, 15, ... unless the anti-accelerator is running
+function bubbleSpeed() {
+  const speed = 1 + SPEEDUP_AMOUNT * Math.floor(level / LEVELS_PER_SPEEDUP);
+  return slowTimer > 0 ? speed * SLOW_FACTOR : speed;
 }
 
 function resize() {
@@ -53,12 +63,12 @@ function popBubble(index) {
   bubbles.splice(index, 1);
   totalPopped++;
   pops++;
-  Shop.refresh();
 
   if (totalPopped % POPS_PER_LEVEL === 0) {
     level++;
-    levelUpTimer = 1.5;
+    levelUpTimer = level % LEVELS_PER_SPEEDUP === 0 ? 2.5 : 1.5; // linger longer on speed-ups
   }
+  Shop.refresh();
 }
 
 function useKnife() {
@@ -76,6 +86,15 @@ function useSpikeWalls() {
   Shop.refresh();
 }
 
+function useAntiAccelerator() {
+  const item = SHOP_ITEMS.find(i => i.id === 'slow');
+  // Don't use one up while bubbles are already slowed
+  if (inventory.slow === 0 || !isUnlocked(item) || slowTimer > 0) return;
+  inventory.slow--;
+  slowTimer = SLOW_DURATION;
+  Shop.refresh();
+}
+
 // Wipes all progress and puts a few bubbles back on screen
 function resetGame() {
   bubbles = [];
@@ -90,6 +109,7 @@ function resetGame() {
   }
   level = 1;
   levelUpTimer = 0;
+  slowTimer = 0;
   spawnTimer = 0;
   Shop.refresh();
 
@@ -171,12 +191,17 @@ function update(dt) {
   if (levelUpTimer > 0) {
     levelUpTimer -= dt;
   }
+  if (slowTimer > 0) {
+    slowTimer -= dt;
+  }
 
   sun.update(dt);
   ground.update(dt);
 
+  // Speeding up time for the bubbles makes them drift and wobble faster
+  const bubbleDt = dt * bubbleSpeed();
   for (const b of bubbles) {
-    b.update(dt, canvas.width, canvas.height);
+    b.update(bubbleDt, canvas.width, canvas.height);
   }
 
   for (const k of knives) {
@@ -238,9 +263,15 @@ function draw() {
   ctx.fillText('Pops: ' + pops, 20, 20);
   ctx.fillText('Level: ' + level, 20, 56);
 
+  // Countdowns for active items, stacked under the level
+  let timerY = 92;
   if (knives.length > 0) {
     const longest = Math.max(...knives.map(k => k.timeLeft));
-    ctx.fillText('🔪 ' + longest.toFixed(1) + 's', 20, 92);
+    ctx.fillText('🔪 ' + longest.toFixed(1) + 's', 20, timerY);
+    timerY += 36;
+  }
+  if (slowTimer > 0) {
+    ctx.fillText('🐢 ' + slowTimer.toFixed(1) + 's', 20, timerY);
   }
 
   if (levelUpTimer > 0) {
@@ -250,6 +281,13 @@ function draw() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Level ' + level + '!', canvas.width / 2, canvas.height / 2);
+    if (level % LEVELS_PER_SPEEDUP === 0) {
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillText('Bubbles speed up!', canvas.width / 2, canvas.height / 2 + 56);
+      if (level === 10) {
+        ctx.fillText('🐢 Anti-Accelerator unlocked in the shop', canvas.width / 2, canvas.height / 2 + 96);
+      }
+    }
     ctx.restore();
   }
 }
