@@ -176,6 +176,12 @@ kbd {
   opacity: 0.9;
 }
 
+#shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .shop-item {
   display: flex;
   align-items: center;

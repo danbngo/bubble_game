@@ -16,13 +16,12 @@
     <ul class="how-to">
       <li>Click bubbles to pop them</li>
       <li>Every 20 pops, bubbles come faster</li>
-      <li>Spend pops in the shop on knives that pop bubbles for you</li>
+      <li>Spend pops in the shop on knives and spike walls that pop bubbles for you</li>
     </ul>
-    <p class="keys"><kbd>S</kbd> shop &nbsp; <kbd>K</kbd> use knife &nbsp; <kbd>P</kbd> pause</p>
+    <p class="keys"><kbd>S</kbd> shop &nbsp; <kbd>K</kbd> knife &nbsp; <kbd>W</kbd> spike walls &nbsp; <kbd>P</kbd> pause</p>
   </div>
 
   <div id="hud-buttons" hidden>
-    <button id="use-knife-btn">🔪 Use knife (0)</button>
     <button id="shop-btn">🛒 Shop</button>
     <button id="pause-btn" title="Pause (P)">⏸</button>
   </div>
@@ -39,14 +38,7 @@
       <h2>🛒 Shop</h2>
       <p class="shop-balance">You have <span id="shop-pops">0</span> pops</p>
 
-      <div class="shop-item">
-        <div class="shop-item-icon">🔪</div>
-        <div class="shop-item-info">
-          <strong>Knife</strong>
-          <span>Flies around popping bubbles for you for 5 seconds.</span>
-        </div>
-        <button id="buy-knife">Buy · 15 pops</button>
-      </div>
+      <div id="shop-items"></div>
 
       <button id="close-shop" class="close-btn">Back to popping</button>
     </div>
@@ -55,6 +47,7 @@
   <script src="js/bubble.js"></script>
   <script src="js/particle.js"></script>
   <script src="js/knife.js"></script>
+  <script src="js/spikewalls.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/game.js"></script>

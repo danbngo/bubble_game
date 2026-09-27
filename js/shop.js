@@ -1,21 +1,68 @@
-// Shop overlay. Uses the game's globals (pops, knivesOwned) defined in game.js.
-const KNIFE_PRICE = 15;
+// Shop overlay. Uses the game's globals (pops, inventory) and item functions from game.js.
 const KNIFE_DURATION = 5; // seconds
+
+// Everything the shop sells. To add an item, add an entry here and a use function in game.js.
+const SHOP_ITEMS = [
+  {
+    id: 'knife',
+    name: 'Knife',
+    icon: '🔪',
+    price: 15,
+    key: 'k',
+    description: 'Flies around popping bubbles for you for 5 seconds.',
+    use: () => useKnife(),
+  },
+  {
+    id: 'walls',
+    name: 'Spike Walls',
+    icon: '🧱',
+    price: 30,
+    key: 'w',
+    description: 'Two spiked walls close in and pop every bubble on screen.',
+    use: () => useSpikeWalls(),
+  },
+];
 
 const Shop = {
   isOpen: false,
+  buyButtons: {},
+  useButtons: {},
 
   init() {
     this.overlay = document.getElementById('shop');
     this.popsLabel = document.getElementById('shop-pops');
-    this.buyKnifeBtn = document.getElementById('buy-knife');
-    this.shopBtn = document.getElementById('shop-btn');
-    this.useKnifeBtn = document.getElementById('use-knife-btn');
 
-    this.shopBtn.addEventListener('click', () => this.open());
+    const itemList = document.getElementById('shop-items');
+    const hud = document.getElementById('hud-buttons');
+    const shopBtn = document.getElementById('shop-btn');
+
+    for (const item of SHOP_ITEMS) {
+      // Row in the shop
+      const row = document.createElement('div');
+      row.className = 'shop-item';
+      row.innerHTML = `
+        <div class="shop-item-icon">${item.icon}</div>
+        <div class="shop-item-info">
+          <strong>${item.name}</strong>
+          <span>${item.description}</span>
+        </div>`;
+      const buyBtn = document.createElement('button');
+      buyBtn.textContent = `Buy · ${item.price} pops`;
+      buyBtn.addEventListener('click', () => this.buy(item));
+      row.appendChild(buyBtn);
+      itemList.appendChild(row);
+      this.buyButtons[item.id] = buyBtn;
+
+      // "Use" button in the HUD, placed before the Shop button
+      const useBtn = document.createElement('button');
+      useBtn.title = `Press ${item.key.toUpperCase()}`;
+      useBtn.addEventListener('click', item.use);
+      hud.insertBefore(useBtn, shopBtn);
+      this.useButtons[item.id] = useBtn;
+    }
+
+    shopBtn.addEventListener('click', () => this.open());
     document.getElementById('close-shop').addEventListener('click', () => this.close());
-    this.buyKnifeBtn.addEventListener('click', () => this.buyKnife());
-    this.useKnifeBtn.addEventListener('click', () => useKnife());
   },
 
   open() {
@@ -34,18 +81,21 @@ const Shop = {
     else this.open();
   },
 
-  buyKnife() {
-    if (pops < KNIFE_PRICE) return;
-    pops -= KNIFE_PRICE;
-    knivesOwned++;
+  buy(item) {
+    if (pops < item.price) return;
+    pops -= item.price;
+    inventory[item.id]++;
     this.refresh();
   },
 
   // Keep button labels and disabled states in sync with the game state
   refresh() {
     this.popsLabel.textContent = pops;
-    this.buyKnifeBtn.disabled = pops < KNIFE_PRICE;
-    this.useKnifeBtn.textContent = `🔪 Use knife (${knivesOwned})`;
-    this.useKnifeBtn.disabled = knivesOwned === 0;
+    for (const item of SHOP_ITEMS) {
+      const owned = inventory[item.id];
+      this.buyButtons[item.id].disabled = pops < item.price;
+      this.useButtons[item.id].textContent = `${item.icon} ${item.name} (${owned})`;
+      this.useButtons[item.id].disabled = owned === 0;
+    }
   },
 };

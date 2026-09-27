@@ -9,9 +9,10 @@ const MIN_SPAWN_INTERVAL = 0.1;
 let bubbles = [];
 let particles = [];
 let knives = [];      // knives currently flying around
+let spikeWalls = null; // the spike walls while they're closing in
 let totalPopped = 0;  // all-time pops, drives the level
 let pops = 0;         // pops you can spend in the shop
-let knivesOwned = 0;
+let inventory = {};   // shop item id -> how many you own
 let started = false;  // false while the title screen is showing
 let paused = false;
 let level = 1;
@@ -58,9 +59,17 @@ function popBubble(index) {
 }
 
 function useKnife() {
-  if (knivesOwned === 0) return;
-  knivesOwned--;
+  if (inventory.knife === 0) return;
+  inventory.knife--;
   knives.push(new Knife(canvas.width / 2, canvas.height / 2, KNIFE_DURATION));
+  Shop.refresh();
+}
+
+function useSpikeWalls() {
+  // Only one set of walls at a time; don't use one up while they're already closing
+  if (inventory.walls === 0 || spikeWalls) return;
+  inventory.walls--;
+  spikeWalls = new SpikeWalls();
   Shop.refresh();
 }
 
@@ -69,9 +78,13 @@ function resetGame() {
   bubbles = [];
   particles = [];
   knives = [];
+  spikeWalls = null;
   totalPopped = 0;
   pops = 0;
-  knivesOwned = 0;
+  inventory = {};
+  for (const item of SHOP_ITEMS) {
+    inventory[item.id] = 0;
+  }
   level = 1;
   levelUpTimer = 0;
   spawnTimer = 0;
@@ -135,8 +148,10 @@ function handleKey(event) {
     return;
   }
   if (paused) return;
-  if (event.key === 'k' || event.key === 'K') useKnife();
   if (event.key === 's' || event.key === 'S') Shop.toggle();
+  for (const item of SHOP_ITEMS) {
+    if (event.key.toLowerCase() === item.key) item.use();
+  }
 }
 
 function update(dt) {
@@ -164,6 +179,16 @@ function update(dt) {
   }
   knives = knives.filter(k => !k.isDone());
 
+  if (spikeWalls) {
+    spikeWalls.update(dt);
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      if (spikeWalls.touches(bubbles[i], canvas.width, canvas.height)) {
+        popBubble(i);
+      }
+    }
+    if (spikeWalls.isDone()) spikeWalls = null;
+  }
+
   for (const p of particles) {
     p.update(dt);
   }
@@ -185,6 +210,9 @@ function draw() {
   }
   for (const k of knives) {
     k.draw(ctx);
+  }
+  if (spikeWalls) {
+    spikeWalls.draw(ctx, canvas.width, canvas.height);
   }
 
   // The title screen shows only the floating bubbles

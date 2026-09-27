@@ -4,6 +4,7 @@ const Sound = {
   audioCtx: null,
   popFile: null,
   popFileReady: false,
+  recentPops: [], // timestamps of pops that just played
 
   init() {
     const audio = new Audio('sounds/pop.mp3');
@@ -13,6 +14,12 @@ const Sound = {
   },
 
   pop(radius) {
+    // When lots of bubbles pop at once (spike walls), only play a few sounds so it doesn't get deafening
+    const now = performance.now();
+    this.recentPops = this.recentPops.filter(t => now - t < 80);
+    if (this.recentPops.length >= 4) return;
+    this.recentPops.push(now);
+
     if (this.popFileReady) {
       const a = this.popFile.cloneNode();
       a.volume = 0.7;
