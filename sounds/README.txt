@@ -1,2 +1,4 @@
-Put your pop sound here as "pop.mp3" and the game will play it whenever a bubble pops.
-If there is no pop.mp3, the game makes its own pop sound instead.
+Optional sound files. If a file is missing, the game makes its own version of the sound.
+
+pop.mp3         plays whenever a bubble pops
+background.mp3  loops quietly in the background while you play (e.g. birdsong)

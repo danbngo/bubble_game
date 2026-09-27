@@ -101,6 +101,7 @@ function resetGame() {
 
 function startGame() {
   started = true;
+  Sound.startAmbience();
   document.getElementById('title-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = false;
 }
@@ -108,6 +109,7 @@ function startGame() {
 function goToTitle() {
   paused = false;
   started = false;
+  Sound.startAmbience(); // was stopped by the pause; keep the birds going on the title screen
   document.getElementById('pause-screen').hidden = true;
   document.getElementById('hud-buttons').hidden = true;
   document.getElementById('title-screen').hidden = false;
@@ -119,6 +121,8 @@ function setPaused(value) {
   if (!started || Shop.isOpen) return;
   paused = value;
   document.getElementById('pause-screen').hidden = !paused;
+  if (paused) Sound.stopAmbience();
+  else Sound.startAmbience();
 }
 
 function handleClick(event) {
