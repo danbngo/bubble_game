@@ -7,6 +7,7 @@ const BASE_SPAWN_INTERVAL = 0.8; // seconds between new bubbles at level 1
 const MIN_SPAWN_INTERVAL = 0.1;
 
 const sun = new Sun();
+const ground = new Ground();
 
 let bubbles = [];
 let particles = [];
@@ -168,6 +169,7 @@ function update(dt) {
   }
 
   sun.update(dt);
+  ground.update(dt);
 
   for (const b of bubbles) {
     b.update(dt, canvas.width, canvas.height);
@@ -207,6 +209,7 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   sun.draw(ctx, canvas.width);
+  ground.draw(ctx, canvas.width, canvas.height);
 
   for (const b of bubbles) {
     b.draw(ctx);
